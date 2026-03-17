@@ -216,7 +216,56 @@ notepad .env.local
 
 The PowerShell script handles: Docker verification, environment validation, SSL setup options (Cloudflare / win-acme / self-signed), Windows Firewall rules, and building + launching the containers.
 
-### Manual Deploy
+### Cloudflare Tunnel (Recommended)
+
+If you're using Cloudflare Tunnel, you can **skip Nginx, SSL certs, and firewall rules entirely**. The tunnel connects outbound from your machine — no open ports needed.
+
+```powershell
+# 1. Start only the app container (no nginx needed)
+docker compose up -d --build app
+
+# 2. Install cloudflared
+winget install --id Cloudflare.cloudflared
+
+# 3. Authenticate with Cloudflare
+cloudflared tunnel login
+
+# 4. Create the tunnel
+cloudflared tunnel create needlekvlt
+
+# 5. Configure the tunnel — create config file
+#    Location: C:\Users\YOUR_USER\.cloudflared\config.yml
+```
+
+Create `config.yml`:
+
+```yaml
+tunnel: needlekvlt
+credentials-file: C:\Users\YOUR_USER\.cloudflared\<TUNNEL_ID>.json
+
+ingress:
+  - hostname: needlekvlt.com
+    service: http://localhost:3000
+  - hostname: www.needlekvlt.com
+    service: http://localhost:3000
+  - service: http_status:404
+```
+
+```powershell
+# 6. Add DNS records in Cloudflare
+cloudflared tunnel route dns needlekvlt needlekvlt.com
+cloudflared tunnel route dns needlekvlt www.needlekvlt.com
+
+# 7. Run the tunnel
+cloudflared tunnel run needlekvlt
+
+# 8. (Optional) Install as Windows service so it starts on boot
+cloudflared service install
+```
+
+That's it — Cloudflare handles SSL, DDoS protection, and routing. Your app only needs to listen on `localhost:3000`.
+
+### Manual Deploy (Without Cloudflare Tunnel)
 
 ```powershell
 # 1. Edit .env.local with your API keys
@@ -240,7 +289,7 @@ New-NetFirewallRule -DisplayName "NeedleKVLT HTTPS" -Direction Inbound -Port 443
 - [ ] Update `NEXTAUTH_URL` in `.env.local` to `https://needlekvlt.com`
 - [ ] Test a real purchase with Stripe test mode
 - [ ] Switch Stripe to live mode when ready
-- [ ] Set up DNS records (A record → server IP)
+- [ ] Set up DNS (Cloudflare Tunnel handles this automatically, otherwise A record → server IP)
 
 ### Useful Commands
 

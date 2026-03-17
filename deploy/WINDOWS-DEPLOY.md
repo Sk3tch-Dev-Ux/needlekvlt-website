@@ -76,7 +76,56 @@ Fill in **every** value in `.env.local`. The critical ones:
 
 ## Step 4 — SSL Certificates
 
-### Option A: win-acme (Recommended for Windows)
+### Option A: Cloudflare Tunnel (Recommended — Easiest)
+
+Cloudflare Tunnel means **no open ports, no SSL certs, no Nginx**. The tunnel connects outbound from your machine to Cloudflare, and Cloudflare handles everything.
+
+```powershell
+# 1. Install cloudflared
+winget install --id Cloudflare.cloudflared
+
+# 2. Authenticate (opens browser)
+cloudflared tunnel login
+
+# 3. Create the tunnel
+cloudflared tunnel create needlekvlt
+
+# 4. Create config file at C:\Users\YOUR_USER\.cloudflared\config.yml
+```
+
+Paste this into `config.yml` (replace `<TUNNEL_ID>` with the ID from step 3):
+
+```yaml
+tunnel: needlekvlt
+credentials-file: C:\Users\YOUR_USER\.cloudflared\<TUNNEL_ID>.json
+
+ingress:
+  - hostname: needlekvlt.com
+    service: http://localhost:3000
+  - hostname: www.needlekvlt.com
+    service: http://localhost:3000
+  - service: http_status:404
+```
+
+```powershell
+# 5. Add DNS records (automatic via Cloudflare)
+cloudflared tunnel route dns needlekvlt needlekvlt.com
+cloudflared tunnel route dns needlekvlt www.needlekvlt.com
+
+# 6. Test the tunnel
+cloudflared tunnel run needlekvlt
+
+# 7. Install as Windows service (auto-starts on boot)
+cloudflared service install
+```
+
+**If using Cloudflare Tunnel, skip Steps 5-7 below** (no Nginx, firewall, or SSL needed).
+In Step 8, just start the app container:
+```powershell
+docker compose up -d app
+```
+
+### Option B: win-acme (Let's Encrypt for Windows)
 
 Download win-acme from https://www.win-acme.com/
 
@@ -96,7 +145,7 @@ C:\wacs\wacs.exe
 #   - Set path: C:\needlekvlt-website\deploy\ssl
 ```
 
-### Option B: Self-signed (for testing only)
+### Option C: Self-signed (for testing only)
 
 ```powershell
 # Generate self-signed cert (testing only — browsers will warn)
@@ -108,13 +157,6 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 `
   -subj "/CN=needlekvlt.com"
 ```
 
-### Option C: Cloudflare (Easiest)
-
-1. Put your domain behind Cloudflare (free plan)
-2. Cloudflare handles SSL termination
-3. Set Nginx to listen on port 80 only (remove SSL config)
-4. Cloudflare proxies HTTPS → your server's port 80
-
 ---
 
 ## Step 5 — Build & Launch
@@ -122,7 +164,10 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 `
 ```powershell
 cd C:\needlekvlt-website
 
-# Build and start all containers
+# If using Cloudflare Tunnel (recommended):
+docker compose up -d --build app
+
+# If using Nginx + SSL certs:
 docker compose up -d --build
 
 # Verify everything is running
@@ -167,6 +212,8 @@ needlekvlt-nginx  | nginx started
 ---
 
 ## Step 7 — Windows Firewall
+
+> **Skip this step if using Cloudflare Tunnel** — the tunnel connects outbound so no inbound ports are needed.
 
 Open ports 80 and 443 in Windows Firewall:
 
