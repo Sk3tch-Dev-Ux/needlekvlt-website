@@ -9,7 +9,7 @@ import { hasRequiredRole } from '@/lib/discord';
 // After login, we check the user's guild roles to determine
 // if they can access gated content (courses).
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     DiscordProvider({
       clientId: process.env.DISCORD_CLIENT_ID,
@@ -67,6 +67,8 @@ const handler = NextAuth({
     strategy: 'jwt',
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

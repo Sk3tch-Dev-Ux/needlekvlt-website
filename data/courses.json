@@ -1,0 +1,68 @@
+[
+  {
+    "id": 1,
+    "title": "Lining Fundamentals",
+    "instructor": "Mike Davis",
+    "duration": "2h 30m",
+    "lessons": 12,
+    "level": "Beginner",
+    "desc": "Master clean, consistent lines. Needle depth, machine speed, skin stretching, and hand positioning.",
+    "videoUrl": "",
+    "published": true
+  },
+  {
+    "id": 2,
+    "title": "Black & Grey Realism",
+    "instructor": "Sarah Chen",
+    "duration": "4h 15m",
+    "lessons": 18,
+    "level": "Advanced",
+    "desc": "Photorealistic shading techniques. Gradient work, whip shading, and reference preparation.",
+    "videoUrl": "",
+    "published": true
+  },
+  {
+    "id": 3,
+    "title": "Neo-Traditional Color Theory",
+    "instructor": "Jake Torres",
+    "duration": "3h 00m",
+    "lessons": 14,
+    "level": "Intermediate",
+    "desc": "Bold color palettes, saturation control, and layering for neo-trad styles.",
+    "videoUrl": "",
+    "published": true
+  },
+  {
+    "id": 4,
+    "title": "Piercing Safety & Technique",
+    "instructor": "Alex Kim",
+    "duration": "1h 45m",
+    "lessons": 8,
+    "level": "Beginner",
+    "desc": "Sterilization protocols, anatomy considerations, jewelry selection, and aftercare guidance.",
+    "videoUrl": "",
+    "published": true
+  },
+  {
+    "id": 5,
+    "title": "Machine Building & Tuning",
+    "instructor": "RJ Black",
+    "duration": "3h 30m",
+    "lessons": 16,
+    "level": "Advanced",
+    "desc": "Coil machine assembly, spring tuning, contact gap adjustment, and voltage optimization.",
+    "videoUrl": "",
+    "published": true
+  },
+  {
+    "id": 6,
+    "title": "Flash Design for Profit",
+    "instructor": "Luna Vega",
+    "duration": "2h 00m",
+    "lessons": 10,
+    "level": "Intermediate",
+    "desc": "Design flash sheets that sell. Pricing, digital tools, printing, and marketing your work.",
+    "videoUrl": "",
+    "published": true
+  }
+]

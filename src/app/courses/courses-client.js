@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import {
   Lock, Shield, MessageCircle, ExternalLink, CheckCircle,
@@ -9,17 +9,21 @@ import {
 
 const DISCORD_INVITE = process.env.NEXT_PUBLIC_DISCORD_INVITE || 'https://discord.gg/jointhekvlt';
 
-const COURSES = [
-  { id: 1, title: 'Lining Fundamentals', instructor: 'Mike Davis', duration: '2h 30m', lessons: 12, level: 'Beginner', desc: 'Master clean, consistent lines. Needle depth, machine speed, skin stretching, and hand positioning.' },
-  { id: 2, title: 'Black & Grey Realism', instructor: 'Sarah Chen', duration: '4h 15m', lessons: 18, level: 'Advanced', desc: 'Photorealistic shading techniques. Gradient work, whip shading, and reference preparation.' },
-  { id: 3, title: 'Neo-Traditional Color Theory', instructor: 'Jake Torres', duration: '3h 00m', lessons: 14, level: 'Intermediate', desc: 'Bold color palettes, saturation control, and layering for neo-trad styles.' },
-  { id: 4, title: 'Piercing Safety & Technique', instructor: 'Alex Kim', duration: '1h 45m', lessons: 8, level: 'Beginner', desc: 'Sterilization protocols, anatomy considerations, jewelry selection, and aftercare guidance.' },
-  { id: 5, title: 'Machine Building & Tuning', instructor: 'RJ Black', duration: '3h 30m', lessons: 16, level: 'Advanced', desc: 'Coil machine assembly, spring tuning, contact gap adjustment, and voltage optimization.' },
-  { id: 6, title: 'Flash Design for Profit', instructor: 'Luna Vega', duration: '2h 00m', lessons: 10, level: 'Intermediate', desc: 'Design flash sheets that sell. Pricing, digital tools, printing, and marketing your work.' },
-];
-
 export default function CoursesClient() {
   const { data: session, status } = useSession();
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+
+  useEffect(() => {
+    if (session?.user?.hasRequiredRole) {
+      setCoursesLoading(true);
+      fetch('/api/courses')
+        .then(res => res.json())
+        .then(data => setCourses(data))
+        .catch(() => setCourses([]))
+        .finally(() => setCoursesLoading(false));
+    }
+  }, [session]);
 
   // Loading
   if (status === 'loading') {
@@ -113,11 +117,22 @@ export default function CoursesClient() {
         Exclusive video content from professional instructors. Click a course to begin watching.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {COURSES.map(course => (
-          <CourseCard key={course.id} course={course} />
-        ))}
-      </div>
+      {coursesLoading ? (
+        <div className="text-center py-12">
+          <div className="w-8 h-8 border-2 border-kvlt-lime border-t-transparent rounded-full animate-spin mx-auto" />
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="bg-kvlt-card border border-kvlt-border rounded-lg p-12 text-center">
+          <Video size={48} className="text-zinc-700 mx-auto mb-4" strokeWidth={1.5} />
+          <p className="text-kvlt-muted">No courses available yet. Check back soon.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {courses.map(course => (
+            <CourseCard key={course.id} course={course} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
